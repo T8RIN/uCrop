@@ -7,7 +7,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'com.t8rin'
             artifactId = 'uCrop-compose'
-            version = '2.3.2'
+            version = '2.3.3'
 
             afterEvaluate {
                 from components.release
