@@ -106,17 +106,18 @@ fun UCrop(
         )
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            if (!context.isChangingConfigurations) {
+                CropCache.clear()
+            }
+        }
+    }
+
     AnimatedContent(bitmap) { image ->
         if (image != null) {
             var viewInstance by remember(image) {
                 mutableStateOf<UCropView?>(null)
-            }
-            DisposableEffect(Unit) {
-                onDispose {
-                    if (!context.isChangingConfigurations) {
-                        CropCache.clear()
-                    }
-                }
             }
             AndroidView(
                 modifier = modifier,
