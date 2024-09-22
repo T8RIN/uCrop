@@ -7,6 +7,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.exifinterface.media.ExifInterface;
+
 import com.yalantis.ucrop.callback.BitmapCropCallback;
 import com.yalantis.ucrop.model.CropParameters;
 import com.yalantis.ucrop.model.ExifInfo;
@@ -16,10 +20,6 @@ import com.yalantis.ucrop.util.ImageHeaderParser;
 
 import java.io.File;
 import java.io.IOException;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.exifinterface.media.ExifInterface;
 
 /**
  * Crops part of image that fills the crop bounds.
@@ -70,7 +70,11 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
 
         mImageInputPath = cropParameters.getImageInputPath();
         mImageOutputPath = cropParameters.getImageOutputPath();
-        mExifInfo = cropParameters.getExifInfo();
+        if (cropParameters.getExifInfo() != null) {
+            mExifInfo = cropParameters.getExifInfo();
+        } else {
+            mExifInfo = new ExifInfo(0, 0, 0);
+        }
 
         mCropCallback = cropCallback;
     }
@@ -103,7 +107,14 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(mImageInputPath, options);
 
-        boolean swapSides = mExifInfo.getExifDegrees() == 90 || mExifInfo.getExifDegrees() == 270;
+        boolean swapSides;
+
+        try {
+            swapSides = mExifInfo.getExifDegrees() == 90 || mExifInfo.getExifDegrees() == 270;
+        } catch (Exception e) {
+            swapSides = false;
+        }
+
         float scaleX = (swapSides ? options.outHeight : options.outWidth) / (float) mViewBitmap.getWidth();
         float scaleY = (swapSides ? options.outWidth : options.outHeight) / (float) mViewBitmap.getHeight();
 
@@ -129,7 +140,12 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
     }
 
     private boolean crop(float resizeScale) throws IOException {
-        ExifInterface originalExif = new ExifInterface(mImageInputPath);
+        ExifInterface originalExif;
+        try {
+            originalExif = new ExifInterface(mImageInputPath);
+        } catch (Exception e) {
+            originalExif = null;
+        }
 
         cropOffsetX = Math.round((mCropRect.left - mCurrentImageRect.left) / mCurrentScale);
         cropOffsetY = Math.round((mCropRect.top - mCurrentImageRect.top) / mCurrentScale);

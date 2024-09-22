@@ -1,7 +1,7 @@
 <resources>
 
     <!--uCrop Activity-->
-    <dimen name="ucrop_padding_crop_frame">16dp</dimen>
+    <dimen name="ucrop_padding_crop_frame">24dp</dimen>
     <dimen name="ucrop_size_dot_scale_text_view">8dp</dimen>
     <dimen name="ucrop_height_horizontal_wheel_progress_line">20dp</dimen>
     <dimen name="ucrop_width_horizontal_wheel_progress_line">2dp</dimen>
@@ -24,6 +24,6 @@
     <dimen name="ucrop_default_crop_frame_stoke_width">1dp</dimen>
     <dimen name="ucrop_default_crop_rect_corner_touch_threshold">30dp</dimen>
     <dimen name="ucrop_default_crop_rect_min_size">100dp</dimen>
-    <dimen name="ucrop_default_crop_rect_corner_touch_area_line_length">10dp</dimen>
+    <dimen name="ucrop_default_crop_rect_corner_touch_area_line_length">20dp</dimen>
 
 </resources>

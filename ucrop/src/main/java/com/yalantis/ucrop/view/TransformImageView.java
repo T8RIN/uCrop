@@ -9,16 +9,21 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
+
 import com.yalantis.ucrop.callback.BitmapLoadCallback;
 import com.yalantis.ucrop.model.ExifInfo;
 import com.yalantis.ucrop.util.BitmapLoadUtils;
 import com.yalantis.ucrop.util.FastBitmapDrawable;
 import com.yalantis.ucrop.util.RectUtils;
 
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatImageView;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
@@ -115,6 +120,22 @@ public class TransformImageView extends AppCompatImageView {
 
     @Override
     public void setImageBitmap(final Bitmap bitmap) {
+        if (mImageInputPath == null) {
+            File file = new File(getContext().getCacheDir(), "temp.png");
+            try (OutputStream os = new FileOutputStream(file)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            File file1 = new File(getContext().getCacheDir(), "out.png");
+
+            mImageInputPath = file.getAbsolutePath();
+            mImageOutputPath = file1.getAbsolutePath();
+            mExifInfo = new ExifInfo(0,0,0);
+
+            mBitmapDecoded = true;
+        }
         setImageDrawable(new FastBitmapDrawable(bitmap));
     }
 
