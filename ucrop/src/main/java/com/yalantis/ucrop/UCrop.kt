@@ -1,15 +1,18 @@
 package com.yalantis.ucrop
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,16 +35,16 @@ private object CropCache {
     private var previousKey: Any? = null
     var bitmap by mutableStateOf<Bitmap?>(null)
 
-    var inputUri by mutableStateOf(Uri.EMPTY)
+    var inputUri: Uri by mutableStateOf(Uri.EMPTY)
 
-    var outputUri by mutableStateOf(Uri.EMPTY)
+    var outputUri: Uri by mutableStateOf(Uri.EMPTY)
 
     suspend fun loadBitmap(
         imageModel: Any?,
         context: Context,
         onLoadingStateChange: (Boolean) -> Unit
     ) {
-        if(previousKey != imageModel) {
+        if (previousKey != imageModel) {
             onLoadingStateChange(true)
             bitmap = null
             bitmap = if (imageModel is Bitmap?) {
@@ -69,6 +72,14 @@ private object CropCache {
         }
         previousKey = imageModel
     }
+
+    fun clear() {
+        bitmap?.recycle()
+        bitmap = null
+        previousKey = null
+        inputUri = Uri.EMPTY
+        outputUri = Uri.EMPTY
+    }
 }
 
 @Composable
@@ -83,7 +94,7 @@ fun UCrop(
     onLoadingStateChange: (Boolean) -> Unit = {}
 ) {
     val bitmap = CropCache.bitmap
-    val context = LocalContext.current
+    val context = LocalContext.current as Activity
     val inputUri = CropCache.inputUri
     val outputUri = CropCache.outputUri
 
@@ -99,6 +110,13 @@ fun UCrop(
         if (image != null) {
             var viewInstance by remember(image) {
                 mutableStateOf<UCropView?>(null)
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    if (!context.isChangingConfigurations) {
+                        CropCache.clear()
+                    }
+                }
             }
             AndroidView(
                 modifier = modifier,
